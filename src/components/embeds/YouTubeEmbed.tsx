@@ -22,6 +22,8 @@ export interface YouTubeEmbedProps extends DivPropsWithoutRef {
   embedPlaceholder?: React.ReactNode;
   placeholderDisabled?: boolean;
   youTubeProps?: YouTubeProps;
+  loadingTimeout?: number;
+  fallbackToThumbnail?: boolean;
 }
 
 export const YouTubeEmbed = ({
@@ -36,9 +38,12 @@ export const YouTubeEmbed = ({
   embedPlaceholder,
   placeholderDisabled,
   youTubeProps,
+  loadingTimeout = 5000,
+  fallbackToThumbnail = true,
   ...divProps
 }: YouTubeEmbedProps) => {
   const [ready, setReady] = React.useState(false);
+  const [timedOut, setTimedOut] = React.useState(false);
 
   const videoIdMatch = url.match(/[?&]v=(.+?)(?:$|[&?])/)?.[1];
   const shortsIdMatch = url.match(/https:\/\/(?:www\.)?youtube\.com\/shorts\/(.+?)(?:$|[&?])/)?.[1];
@@ -46,6 +51,18 @@ export const YouTubeEmbed = ({
   const embedLinkMatch = url.match(/https:\/\/(?:www\.)youtube(-nocookie)?\.com\/embed\/(.+?)(?:$|[&?])/)?.[2];
   const videoId = videoIdMatch ?? shortsIdMatch ?? shortLinkMatch ?? embedLinkMatch ?? '00000000';
   const start = +(url.match(/(.+?)(?:$|[&?])start=(\d+)/)?.[2] ?? 0);
+
+  // Set up timeout for loading fallback
+  React.useEffect(() => {
+    if (!ready && loadingTimeout > 0 && fallbackToThumbnail) {
+      const timer = setTimeout(() => {
+        setTimedOut(true);
+      }, loadingTimeout);
+
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [ready, loadingTimeout, fallbackToThumbnail]);
 
   const isPercentageWidth = !!width?.toString().includes('%');
   const isPercentageHeight = !!height?.toString().includes('%');
@@ -76,13 +93,20 @@ export const YouTubeEmbed = ({
     border: '1px solid #dee2e6',
     borderRadius,
   };
+
+  // Generate YouTube thumbnail URL if timed out and no custom image provided
+  const thumbnailUrl =
+    timedOut && fallbackToThumbnail && !placeholderImageUrl
+      ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+      : placeholderImageUrl;
+
   const placeholder = embedPlaceholder ?? (
     <PlaceholderEmbed
       url={url}
-      imageUrl={placeholderImageUrl}
+      imageUrl={thumbnailUrl}
       linkText={linkText}
       spinner={placeholderSpinner}
-      spinnerDisabled={placeholderSpinnerDisabled}
+      spinnerDisabled={timedOut ? true : placeholderSpinnerDisabled}
       {...placeholderProps}
       style={{ ...placeholderStyle, ...placeholderProps?.style }}
     />
