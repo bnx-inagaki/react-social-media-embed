@@ -49,7 +49,8 @@ export const YouTubeEmbed = ({
   const shortsIdMatch = url.match(/https:\/\/(?:www\.)?youtube\.com\/shorts\/(.+?)(?:$|[&?])/)?.[1];
   const shortLinkMatch = url.match(/https:\/\/youtu\.be\/(.+?)(?:$|[&?])/)?.[1];
   const embedLinkMatch = url.match(/https:\/\/(?:www\.)youtube(-nocookie)?\.com\/embed\/(.+?)(?:$|[&?])/)?.[2];
-  const videoId = videoIdMatch ?? shortsIdMatch ?? shortLinkMatch ?? embedLinkMatch ?? '00000000';
+  const liveIdMatch = url.match(/https:\/\/(?:www\.)?youtube\.com\/live\/(.+?)(?:$|[&?])/)?.[1];
+  const videoId = videoIdMatch ?? shortsIdMatch ?? shortLinkMatch ?? embedLinkMatch ?? liveIdMatch ?? '00000000';
   const start = +(url.match(/(.+?)(?:$|[&?])start=(\d+)/)?.[2] ?? 0);
 
   // Set up timeout for loading fallback
