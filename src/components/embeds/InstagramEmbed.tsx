@@ -93,8 +93,22 @@ export const InstagramEmbed = ({
   React.useEffect(() => {
     if (stage === LOAD_SCRIPT_STAGE) {
       if (frm.document) {
+        const win = frm.window as any;
+        // Instagram's embed.js checks `(window.FB && !window.FB.__buffer)` at the top
+        // and skips its initialization IIFE if Facebook SDK has already loaded.
+        // This prevents window.instgrm from being set.
+        // Workaround: temporarily remove window.FB before loading embed.js, then restore it.
+        const savedFB = win?.FB;
+        if (savedFB) {
+          delete win.FB;
+        }
         const scriptElement = frm.document.createElement('script');
         scriptElement.setAttribute('src', embedJsScriptSrc);
+        scriptElement.onload = () => {
+          if (savedFB) {
+            win.FB = savedFB;
+          }
+        };
         frm.document.head.appendChild(scriptElement);
         setStage(CONFIRM_SCRIPT_LOADED_STAGE);
       }
