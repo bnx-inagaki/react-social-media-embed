@@ -94,10 +94,9 @@ export const InstagramEmbed = ({
     if (stage === LOAD_SCRIPT_STAGE) {
       if (frm.document) {
         const win = frm.window as any;
-        // Instagram's embed.js checks `(window.FB && !window.FB.__buffer)` at the top
-        // and skips its initialization IIFE if Facebook SDK has already loaded.
-        // This prevents window.instgrm from being set.
-        // Workaround: temporarily remove window.FB before loading embed.js, then restore it.
+        // Instagram の embed.js は冒頭で `(window.FB && !window.FB.__buffer)` をチェックし、
+        // Facebook SDK が既にロード済みの場合、初期化をスキップして window.instgrm がセットされない。
+        // 回避策: embed.js ロード前に window.FB を一時退避し、ロード完了後に復元する。
         const savedFB = win?.FB;
         if (savedFB) {
           delete win.FB;

@@ -139,9 +139,10 @@ const FacebookEmbed = (_a) => {
     }, [stage]);
     // END Embed Stages
     // === === === === === === === === === === === === === === === === === === ===
-    // Normalize width: treat "auto" as "100%" so the embed adapts to its container.
-    // "auto" is not a valid value for the Facebook SDK's data-width attribute and causes
-    // container_width=0 in the resulting iframe URL, making the embed invisible.
+    // width="auto" を "100%" に正規化する。
+    // "auto" は Facebook SDK の data-width 属性として無効な値で、
+    // iframe の container_width=0 となり埋め込みが非表示になる。
+    // "auto" は null/undefined ではないため ?? では捕捉できず、明示的な変換が必要。
     const normalizedWidth = width === 'auto' ? '100%' : width;
     const isPercentageWidth = !!(normalizedWidth === null || normalizedWidth === void 0 ? void 0 : normalizedWidth.toString().includes('%'));
     const isPercentageHeight = !!(height === null || height === void 0 ? void 0 : height.toString().includes('%'));
