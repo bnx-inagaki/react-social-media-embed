@@ -94,8 +94,11 @@ export const InstagramEmbed = ({
     if (stage === LOAD_SCRIPT_STAGE) {
       if (frm.document) {
         const win = frm.window as any;
-        // Instagram の embed.js は冒頭で `(window.FB && !window.FB.__buffer)` をチェックし、
-        // Facebook SDK が既にロード済みの場合、初期化をスキップして window.instgrm がセットされない。
+        // Instagram の embed.js は Meta(旧Facebook) の SDK 基盤上に構築されており、
+        // 内部で window.FB を共有している。
+        // embed.js の冒頭で `(window.FB && !window.FB.__buffer)` をチェックし、
+        // Facebook SDK が既にロード済みの場合、二重初期化を避けるためにスキップするが、
+        // その際 window.instgrm のセットアップまで一緒にスキップされてしまう（Meta側の不具合）。
         // 回避策: embed.js ロード前に window.FB を一時退避し、ロード完了後に復元する。
         const savedFB = win?.FB;
         if (savedFB) {
