@@ -139,12 +139,17 @@ const FacebookEmbed = (_a) => {
     }, [stage]);
     // END Embed Stages
     // === === === === === === === === === === === === === === === === === === ===
-    const isPercentageWidth = !!(width === null || width === void 0 ? void 0 : width.toString().includes('%'));
+    // width="auto" を "100%" に正規化する。
+    // "auto" は Facebook SDK の data-width 属性として無効な値で、
+    // iframe の container_width=0 となり埋め込みが非表示になる。
+    // "auto" は null/undefined ではないため ?? では捕捉できず、明示的な変換が必要。
+    const normalizedWidth = width === 'auto' ? '100%' : width;
+    const isPercentageWidth = !!(normalizedWidth === null || normalizedWidth === void 0 ? void 0 : normalizedWidth.toString().includes('%'));
     const isPercentageHeight = !!(height === null || height === void 0 ? void 0 : height.toString().includes('%'));
     // === Placeholder ===
     const placeholderStyle = {
         maxWidth: isPercentageWidth ? undefined : maxPlaceholderWidth,
-        width: typeof width !== 'undefined' ? (isPercentageWidth ? '100%' : width) : '100%',
+        width: typeof normalizedWidth !== 'undefined' ? (isPercentageWidth ? '100%' : normalizedWidth) : '100%',
         height: isPercentageHeight
             ? '100%'
             : typeof height !== 'undefined'
@@ -157,11 +162,11 @@ const FacebookEmbed = (_a) => {
     };
     const placeholder = embedPlaceholder !== null && embedPlaceholder !== void 0 ? embedPlaceholder : (react_1.default.createElement(PlaceholderEmbed_1.PlaceholderEmbed, Object.assign({ url: url, imageUrl: placeholderImageUrl, linkText: linkText, spinner: placeholderSpinner, spinnerDisabled: placeholderSpinnerDisabled }, placeholderProps, { style: Object.assign(Object.assign({}, placeholderStyle), placeholderProps === null || placeholderProps === void 0 ? void 0 : placeholderProps.style) })));
     // === END Placeholder ===
-    return (react_1.default.createElement("div", Object.assign({}, divProps, { className: (0, classnames_1.default)('rsme-embed rsme-facebook-embed', divProps.className), style: Object.assign({ overflow: 'hidden', width: width !== null && width !== void 0 ? width : undefined, height: height !== null && height !== void 0 ? height : undefined, borderRadius }, divProps.style) }),
+    return (react_1.default.createElement("div", Object.assign({}, divProps, { className: (0, classnames_1.default)('rsme-embed rsme-facebook-embed', divProps.className), style: Object.assign({ overflow: 'hidden', width: normalizedWidth !== null && normalizedWidth !== void 0 ? normalizedWidth : undefined, height: height !== null && height !== void 0 ? height : undefined, borderRadius }, divProps.style) }),
         react_1.default.createElement(EmbedStyle_1.EmbedStyle, null),
         react_1.default.createElement("div", { id: uuidRef.current, className: (0, classnames_1.default)(!embedSuccess && 'rsme-d-none') },
-            react_1.default.createElement("div", { key: embedContainerKey, className: "fb-post", "data-href": url, "data-width": isPercentageWidth ? '100%' : width !== null && width !== void 0 ? width : defaultEmbedWidth, style: {
-                    width: isPercentageWidth ? '100%' : width !== null && width !== void 0 ? width : defaultEmbedWidth,
+            react_1.default.createElement("div", { key: embedContainerKey, className: "fb-post", "data-href": url, "data-width": isPercentageWidth ? '100%' : normalizedWidth !== null && normalizedWidth !== void 0 ? normalizedWidth : defaultEmbedWidth, style: {
+                    width: isPercentageWidth ? '100%' : normalizedWidth !== null && normalizedWidth !== void 0 ? normalizedWidth : defaultEmbedWidth,
                     height: isPercentageHeight ? '100%' : height !== null && height !== void 0 ? height : undefined,
                 } })),
         !embedSuccess && !placeholderDisabled && placeholder));

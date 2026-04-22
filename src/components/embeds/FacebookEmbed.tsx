@@ -164,13 +164,18 @@ export const FacebookEmbed = ({
   // END Embed Stages
   // === === === === === === === === === === === === === === === === === === ===
 
-  const isPercentageWidth = !!width?.toString().includes('%');
+  // width="auto" を "100%" に正規化する。
+  // "auto" は Facebook SDK の data-width 属性として無効な値で、
+  // iframe の container_width=0 となり埋め込みが非表示になる。
+  // "auto" は null/undefined ではないため ?? では捕捉できず、明示的な変換が必要。
+  const normalizedWidth = width === 'auto' ? '100%' : width;
+  const isPercentageWidth = !!normalizedWidth?.toString().includes('%');
   const isPercentageHeight = !!height?.toString().includes('%');
 
   // === Placeholder ===
   const placeholderStyle: React.CSSProperties = {
     maxWidth: isPercentageWidth ? undefined : maxPlaceholderWidth,
-    width: typeof width !== 'undefined' ? (isPercentageWidth ? '100%' : width) : '100%',
+    width: typeof normalizedWidth !== 'undefined' ? (isPercentageWidth ? '100%' : normalizedWidth) : '100%',
     height: isPercentageHeight
       ? '100%'
       : typeof height !== 'undefined'
@@ -200,7 +205,7 @@ export const FacebookEmbed = ({
       className={classNames('rsme-embed rsme-facebook-embed', divProps.className)}
       style={{
         overflow: 'hidden',
-        width: width ?? undefined,
+        width: normalizedWidth ?? undefined,
         height: height ?? undefined,
         borderRadius,
         ...divProps.style,
@@ -212,9 +217,9 @@ export const FacebookEmbed = ({
           key={embedContainerKey}
           className="fb-post"
           data-href={url}
-          data-width={isPercentageWidth ? '100%' : width ?? defaultEmbedWidth}
+          data-width={isPercentageWidth ? '100%' : normalizedWidth ?? defaultEmbedWidth}
           style={{
-            width: isPercentageWidth ? '100%' : width ?? defaultEmbedWidth,
+            width: isPercentageWidth ? '100%' : normalizedWidth ?? defaultEmbedWidth,
             height: isPercentageHeight ? '100%' : height ?? undefined,
           }}
         ></div>
